@@ -1,0 +1,82 @@
+"","combo1","combo2","Effect","Pct_rope"
+"1","Both_Artifact","Both_Artifact",0,1
+"2","Both_Artifact","Both_Natural",-0.332775451018199,0.2945
+"3","Both_Artifact","Both_Value",0.296446579663785,0.34275
+"4","Both_Artifact","Is not_Artifact",-1.53452179334166,0.0205
+"5","Both_Artifact","Is not_Natural",-1.32670229037,0.02625
+"6","Both_Artifact","Is not_Value",-2.17024508563685,0
+"7","Both_Artifact","Is_Artifact",-3.07789977748377,0
+"8","Both_Artifact","Is_Natural",-2.66484752074303,0
+"9","Both_Artifact","Is_Value",-2.57216464114252,0
+"10","Both_Natural","Both_Artifact",0.332775451018199,0.2945
+"11","Both_Natural","Both_Natural",0,1
+"12","Both_Natural","Both_Value",0.629222030681984,0.04775
+"13","Both_Natural","Is not_Artifact",-1.20174634232346,0.04025
+"14","Both_Natural","Is not_Natural",-0.993926839351796,0.0765
+"15","Both_Natural","Is not_Value",-1.83746963461865,5e-04
+"16","Both_Natural","Is_Artifact",-2.74512432646558,0
+"17","Both_Natural","Is_Natural",-2.33207206972483,0
+"18","Both_Natural","Is_Value",-2.23938919012433,0
+"19","Both_Value","Both_Artifact",-0.296446579663785,0.34275
+"20","Both_Value","Both_Natural",-0.629222030681984,0.04775
+"21","Both_Value","Both_Value",0,1
+"22","Both_Value","Is not_Artifact",-1.83096837300545,0.00025
+"23","Both_Value","Is not_Natural",-1.62314887003378,0.00325
+"24","Both_Value","Is not_Value",-2.46669166530063,0
+"25","Both_Value","Is_Artifact",-3.37434635714756,0
+"26","Both_Value","Is_Natural",-2.96129410040682,0
+"27","Both_Value","Is_Value",-2.86861122080631,0
+"28","Is not_Artifact","Both_Artifact",1.53452179334166,0.0205
+"29","Is not_Artifact","Both_Natural",1.20174634232346,0.04025
+"30","Is not_Artifact","Both_Value",1.83096837300545,0.00025
+"31","Is not_Artifact","Is not_Artifact",0,1
+"32","Is not_Artifact","Is not_Natural",0.207819502971668,0.37475
+"33","Is not_Artifact","Is not_Value",-0.635723292295185,0.0845
+"34","Is not_Artifact","Is_Artifact",-1.54337798414211,0.015
+"35","Is not_Artifact","Is_Natural",-1.13032572740137,0.044
+"36","Is not_Artifact","Is_Value",-1.03764284780086,0.0515
+"37","Is not_Natural","Both_Artifact",1.32670229037,0.02625
+"38","Is not_Natural","Both_Natural",0.993926839351796,0.0765
+"39","Is not_Natural","Both_Value",1.62314887003378,0.00325
+"40","Is not_Natural","Is not_Artifact",-0.207819502971668,0.37475
+"41","Is not_Natural","Is not_Natural",0,1
+"42","Is not_Natural","Is not_Value",-0.843542795266853,0.021
+"43","Is not_Natural","Is_Artifact",-1.75119748711378,0.003
+"44","Is not_Natural","Is_Natural",-1.33814523037304,0.028
+"45","Is not_Natural","Is_Value",-1.24546235077253,0.0245
+"46","Is not_Value","Both_Artifact",2.17024508563685,0
+"47","Is not_Value","Both_Natural",1.83746963461865,5e-04
+"48","Is not_Value","Both_Value",2.46669166530063,0
+"49","Is not_Value","Is not_Artifact",0.635723292295185,0.0845
+"50","Is not_Value","Is not_Natural",0.843542795266853,0.021
+"51","Is not_Value","Is not_Value",0,1
+"52","Is not_Value","Is_Artifact",-0.907654691846926,0.074
+"53","Is not_Value","Is_Natural",-0.494602435106182,0.19775
+"54","Is not_Value","Is_Value",-0.401919555505676,0.23275
+"55","Is_Artifact","Both_Artifact",3.07789977748377,0
+"56","Is_Artifact","Both_Natural",2.74512432646558,0
+"57","Is_Artifact","Both_Value",3.37434635714756,0
+"58","Is_Artifact","Is not_Artifact",1.54337798414211,0.015
+"59","Is_Artifact","Is not_Natural",1.75119748711378,0.003
+"60","Is_Artifact","Is not_Value",0.907654691846926,0.074
+"61","Is_Artifact","Is_Artifact",0,1
+"62","Is_Artifact","Is_Natural",0.413052256740744,0.242
+"63","Is_Artifact","Is_Value",0.50573513634125,0.15575
+"64","Is_Natural","Both_Artifact",2.66484752074303,0
+"65","Is_Natural","Both_Natural",2.33207206972483,0
+"66","Is_Natural","Both_Value",2.96129410040682,0
+"67","Is_Natural","Is not_Artifact",1.13032572740137,0.044
+"68","Is_Natural","Is not_Natural",1.33814523037304,0.028
+"69","Is_Natural","Is not_Value",0.494602435106182,0.19775
+"70","Is_Natural","Is_Artifact",-0.413052256740744,0.242
+"71","Is_Natural","Is_Natural",0,1
+"72","Is_Natural","Is_Value",0.0926828796005062,0.374
+"73","Is_Value","Both_Artifact",2.57216464114252,0
+"74","Is_Value","Both_Natural",2.23938919012433,0
+"75","Is_Value","Both_Value",2.86861122080631,0
+"76","Is_Value","Is not_Artifact",1.03764284780086,0.0515
+"77","Is_Value","Is not_Natural",1.24546235077253,0.0245
+"78","Is_Value","Is not_Value",0.401919555505676,0.23275
+"79","Is_Value","Is_Artifact",-0.50573513634125,0.15575
+"80","Is_Value","Is_Natural",-0.0926828796005062,0.374
+"81","Is_Value","Is_Value",0,1

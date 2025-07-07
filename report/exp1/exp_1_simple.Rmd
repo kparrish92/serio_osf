@@ -1,0 +1,202 @@
+---
+title: "Experiment 1"
+output: html_document
+date: "2024-11-3"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(here)
+library(tidyverse)
+library(bayestestR)
+library(brms)
+exp1_mod_nm = read_rds(here("data", "models", "ord_nonmember.rds"))
+exp1_mod_m = read_rds(here("data", "models", "ord_member.rds"))
+
+exp1_mod_nm_s = read_rds(here("data", "models", "ord_nonmember_s.rds")) 
+exp1_mod_m_s = read_rds(here("data", "models", "ord_member_s.rds"))
+
+exp1_data_member = read.csv(here("data", "tidy", "member_tidy.csv"))
+exp1_data_non_member = read.csv(here("data", "tidy", "nonmember_tidy.csv"))
+```
+
+# Descriptive Data 
+
+### Member prompt
+
+```{r}
+exp1_data_member %>% 
+  group_by(CategoryType) %>% 
+  summarize(Mean = mean(Rating), Standard_Deviation = sd(Rating)) %>% 
+  knitr::kable(digits = 2, caption = "Mean Ratings of the Member prompt for each condition")
+```
+
+```{r, fig.cap= "The distribution of ratings for the member prompt"}
+exp1_data_member %>% 
+  ggplot(aes(x = as.integer(Rating), fill = CategoryType)) + geom_histogram(binwidth = 1, color = "black") + facet_wrap(~CategoryType) + theme_minimal() + xlab("Rating")
+```
+
+### Non-member prompt 
+
+```{r}
+exp1_data_non_member %>% 
+  group_by(CategoryType) %>% 
+  summarize(Mean = mean(Rating), Standard_Deviation = sd(Rating)) %>% 
+  knitr::kable(digits = 2, caption = "Mean Ratings of the Non-Member prompt for each condition")
+```
+
+```{r, fig.cap= "The distribution of ratings for the non-member prompt"}
+exp1_data_non_member %>% 
+  ggplot(aes(x = as.integer(Rating), fill = CategoryType)) + geom_histogram(binwidth = 1, color = "black") + facet_wrap(~CategoryType) + theme_minimal() + xlab("Rating")
+```
+
+# Model Details
+
+This page reports the results of the two ordinal models - one in which there was the "member" prompt and another with the "non-member" prompt. Each model's parameter estimates are reported, followed by conditonal effects plots that show the probabiliy of each answer choice in each condition.
+
+Each model predicted the rating (1-7) as an ordinal variable. The fixed effect predictors included CategoryType (5 levels), with a random effects structure that included a slope of CategoryType by participant and a random intercept for item.
+
+Models were fit using the `brms` function in R. All models were fit with 2000 iterations (1000 warm-up). Hamiltonian Monte-Carlo sampling was carried out with 4 chains distributed between 4 processing cores.
+
+# Priors 
+
+For priors, I simply set the predicted initial breakpoints (probability of a choice of 1). The implementation of the other breakpoints turns out to be complicated. This does not seem to have a huge impact on the qualitative results.
+
+For the member model, priors were set for the effects Definite (mean = -4.04), Natural (mean = -0.69), Vague (1.84) and Value (.636). All standard deviations were set to .5. 
+
+# Member Model
+
+The posterior distribution of the ordinal model (member) is shown below. These numbers are difficult to interpret directly (the subsequent plots are for this). This is still important to report, though, since in shows information about model fit and will be used in the sensitivity analysis. 
+
+**Posterior Distribution of the member model**
+```{r}
+describe_posterior(exp1_mod_m) %>% 
+    as_tibble() %>% 
+  select(-c("CI", "ROPE_CI", "ROPE_low", "ROPE_high")) %>% 
+  mutate(ESS = round(ESS)) %>% 
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+The plot below was created using the `conditional_effects` function in R. Using the model as input, it generates a probability of each answer choice in each condition. 
+
+**Conditional effects plot of the member model**
+```{r}
+conditional_effects(exp1_mod_m, categorical = TRUE)
+```
+
+**Conditional effects table of the member model**
+```{r}
+conditional_effects(exp1_mod_m, categorical = TRUE)[["CategoryType:cats__"]] %>% 
+  select(effect1__, effect2__, estimate__, lower__, upper__) %>% 
+  rename("CategoryType" = "effect1__") %>% 
+  rename("Rating" = "effect2__") %>% 
+  mutate(estimate__ = round(estimate__, digits = 2)) %>% 
+  mutate(lower__ = round(lower__, digits = 2)) %>% 
+  mutate(upper__ = round(upper__, digits = 2)) %>% 
+  mutate(model_effect = paste0(estimate__, " [", lower__, " - ", upper__, "]")) %>% 
+  select(CategoryType, Rating, model_effect) %>% 
+  pivot_wider(names_from = Rating, values_from = model_effect) %>%  knitr::kable(format = "pandoc", digits = 2)
+
+```
+
+# Non-member model
+
+**Posterior Distribution of the non-member model**
+```{r}
+describe_posterior(exp1_mod_nm) %>% 
+    as_tibble() %>% 
+  select(-c("CI", "ROPE_CI", "ROPE_low", "ROPE_high")) %>% 
+  mutate(ESS = round(ESS)) %>% 
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+
+**Conditional effects plot of the non-member model**
+```{r}
+conditional_effects(exp1_mod_nm, categorical = TRUE)
+```
+
+
+**Conditional effects table of the non-member model**
+```{r}
+conditional_effects(exp1_mod_nm, categorical = TRUE)[["CategoryType:cats__"]] %>%
+  select(effect1__, effect2__, estimate__, lower__, upper__) %>% 
+  rename("CategoryType" = "effect1__") %>% 
+  rename("Rating" = "effect2__") %>% 
+  mutate(estimate__ = round(estimate__, digits = 2)) %>% 
+  mutate(lower__ = round(lower__, digits = 2)) %>% 
+  mutate(upper__ = round(upper__, digits = 2)) %>% 
+  mutate(model_effect = paste0(estimate__, " [", lower__, " - ", upper__, "]")) %>% 
+  select(CategoryType, Rating, model_effect) %>% 
+  pivot_wider(names_from = Rating, values_from = model_effect) %>%  knitr::kable(format = "pandoc", digits = 2)
+```
+
+# Sensitivity Analysis 
+
+These are the same models fit without the use of priors. 
+
+## Base member model
+
+**Posterior Distribution of the member model with default priors**
+```{r}
+describe_posterior(exp1_mod_m_s) %>% 
+  as_tibble() %>% 
+  select(-c("CI", "ROPE_CI", "ROPE_low", "ROPE_high")) %>% 
+  mutate(ESS = round(ESS)) %>% 
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+The plot below was created using the `conditional_effects` function in R. Using the model as input, it generates a probability of each answer choice in each condition. 
+
+**Conditional effects plot of the member model with default priors**
+```{r}
+conditional_effects(exp1_mod_m_s, categorical = TRUE)
+```
+
+**Conditional effects table of the member model with default priors**
+```{r}
+conditional_effects(exp1_mod_m_s, categorical = TRUE)[["CategoryType:cats__"]] %>% 
+  select(effect1__, effect2__, estimate__, lower__, upper__) %>% 
+  rename("CategoryType" = "effect1__") %>% 
+  rename("Rating" = "effect2__") %>% 
+  mutate(estimate__ = round(estimate__, digits = 2)) %>% 
+  mutate(lower__ = round(lower__, digits = 2)) %>% 
+  mutate(upper__ = round(upper__, digits = 2)) %>% 
+  mutate(model_effect = paste0(estimate__, " [", lower__, " - ", upper__, "]")) %>% 
+  select(CategoryType, Rating, model_effect) %>% 
+  pivot_wider(names_from = Rating, values_from = model_effect) %>%  knitr::kable(format = "pandoc", digits = 2)
+
+```
+
+## Base non-member model 
+
+**Posterior Distribution of the non-member model with default priors**
+```{r}
+describe_posterior(exp1_mod_nm_s) %>% 
+    as_tibble() %>% 
+  select(-c("CI", "ROPE_CI", "ROPE_low", "ROPE_high")) %>% 
+  mutate(ESS = round(ESS)) %>% 
+  knitr::kable(format = "pandoc", digits = 2)
+```
+
+
+**Conditional effects plot of the non-member model with default priors**
+```{r}
+conditional_effects(exp1_mod_nm_s, categorical = TRUE)
+```
+
+
+**Conditional effects table of the non-member model with default priors**
+```{r}
+conditional_effects(exp1_mod_nm_s, categorical = TRUE)[["CategoryType:cats__"]] %>% 
+  select(effect1__, effect2__, estimate__, lower__, upper__) %>% 
+  rename("CategoryType" = "effect1__") %>% 
+  rename("Rating" = "effect2__") %>% 
+  mutate(estimate__ = round(estimate__, digits = 2)) %>% 
+  mutate(lower__ = round(lower__, digits = 2)) %>% 
+  mutate(upper__ = round(upper__, digits = 2)) %>% 
+  mutate(model_effect = paste0(estimate__, " [", lower__, " - ", upper__, "]")) %>% 
+  select(CategoryType, Rating, model_effect) %>% 
+  pivot_wider(names_from = Rating, values_from = model_effect) %>%  knitr::kable(format = "pandoc", digits = 2)
+```
+

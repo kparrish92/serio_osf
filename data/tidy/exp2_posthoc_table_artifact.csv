@@ -1,0 +1,4 @@
+"","Comparison","Effect","Compelling_difference"
+"1","Is_Artifact_Is not_Artifact","0.86 [-0.77 - 2.57]","No"
+"2","Is_Artifact_Both_Artifact","2.48 [1.04 - 3.89]","Yes"
+"3","Both_Artifact_Is not_Artifact","-1.62 [-3.25 - -0.2]","Yes"
