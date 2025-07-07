@@ -1,4 +1,7 @@
-source(here::here("report", "exp2", "pairwise_comp_function.R"))
+# This script runs the pairwise comparisons using a custom function and generates 
+# the plots
+
+source(here::here("report", "exp2", "00_pairwise_comp_function.R"))
 
 b2 = readRDS(here("data", "models", "exp2_model.rds"))
 senses_tidy = read.csv(here("data", "tidy", "senses_tidy.csv")) 

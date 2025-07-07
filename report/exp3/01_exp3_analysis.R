@@ -3,7 +3,10 @@ library(tidyverse)
 library(brms)
 library(bayestestR)
 
+# Load helper functions (including pairwise comp fuction)
+source(here::here("report", "exp2", "00_pairwise_comp_function.R"))
 
+# Tidy the data 
 exp3_tidy = read.csv(here("data", "tidy", "four_choice_data.csv")) %>% 
   rename("CategoryType" = "kind") %>% 
   rename("Selection" = "response") %>% 
@@ -17,14 +20,10 @@ exp3_tidy = read.csv(here("data", "tidy", "four_choice_data.csv")) %>%
     CategoryType == "artifact" ~ "artifact"
   ))
 
-exp3_tidy %>% 
-  group_by(Participant) %>% 
-  summarise(n = n())
-
-
 #### Generate priors from desc data from exp 2 
 senses_tidy = read.csv(here("data", "tidy", "senses_tidy.csv")) # Load exp 2 data 
 
+# Check the total data per category to calculate a percentage 
 senses_tidy %>% 
   group_by(CategoryType) %>% 
   summarise(n = n())
@@ -59,6 +58,7 @@ akira_val = qlogis(.212)
 # Elaine is right - .226
 elaine_val = qlogis(.226)
 
+# set sd and intercepts 
 sd = .5
 both_int = paste0("normal(", qlogis(.587), ", ",sd,")")
 akira_int = paste0("normal(", qlogis(.0625), ", ",sd,")")
@@ -72,6 +72,7 @@ mod7 = elaine_val - qlogis(.351)
 mod8 = qlogis(.002) - qlogis(.001)
 mod9 = qlogis(.002) - qlogis(.001)
 
+# set priors
 prior_check = c(set_prior(both_int, class = "Intercept", dpar = "muBoth"),
                 set_prior(elaine_int, class = "Intercept", dpar = "muElaineright"),
                 set_prior(neither_int, class = "Intercept", dpar = "muNeither"),
@@ -83,29 +84,30 @@ prior_check = c(set_prior(both_int, class = "Intercept", dpar = "muBoth"),
                 set_prior(paste0("normal(", mod9, ", ",sd,")"), class = "b", dpar = "muNeither", coef = "CategoryTypevalue"))
                 
          
-
+# run model with priors 
 b3 <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | spec), 
             data=exp3_tidy,
             prior = prior_check,
             family="categorical",
             file = here("data", "models", "exp3_model.rds"))
 
+# run model with default priors
 b3_s <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | spec), 
           data=exp3_tidy,
           family="categorical",
           file = here("data", "models", "exp3_model_s.rds"))
-
-conditional_effects(b3,categorical = TRUE)
 
 
 ### Pairwise comparisons 
 answer1 = c("Akira right", "Both", "Elaine right", "Neither")
 category1 = c("value", "artifact", "natural_kind")
 
+# make a dataframe crossing all possible combos to loop through
 df_source = crossing(answer1,category1) %>% 
   mutate(cat_c = paste0(answer1,"_",category1))
 
-
+# run the loop
+## list for storage
 comp_list = list()  
 
 for (i in 1:12) {
@@ -115,10 +117,12 @@ for (i in 1:12) {
   comp_list[[i]] = this_df
 }
 
+# combine the list into a df
 combos = do.call(rbind, comp_list) 
 
 rope_for_data = .2
 
+# use combos dataframe to generate bigger post-hoc comparisons dataframe 
 list_pdf = list()
 for (it in 1:nrow(combos)) {
   pdf = create_pairwise_df_exp3(combos$answer1[it], combos$category1[it],
@@ -128,12 +132,10 @@ for (it in 1:nrow(combos)) {
   list_pdf[[it]] = pdf
 }
 
+# combine 
 all_data = do.call(rbind,list_pdf)
 
-all_data %>% group_by(combo1, combo2) %>% 
-  summarize(Effect = mean(effect), 
-            Pct_rope = sum(in_rope)/4000) 
-
+# save output
 all_data %>% 
   write.csv(here("data", "tidy", "exp3_pairwise_data.csv"))
 

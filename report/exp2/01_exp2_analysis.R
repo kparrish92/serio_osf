@@ -1,15 +1,15 @@
 # This script uses the raw data from exp 1 to generate priors for experiment 2.
+# This script then runs 2 models - one using default priors and the other with informed 
 library(here)
 library(tidyverse)
 library(brms)
 library(bayestestR)
 
-
-# Note: the files need to be inside a folder called "tidy", which is inside a folder called "data". If it's somewhere else, you can adjust these lines to read the data.
+# load data 
 nonmember_tidy = read.csv(here("data", "tidy", "nonmember_tidy.csv"))
 member_tidy = read.csv(here("data", "tidy", "member_tidy.csv"))
 
-# make a grouped dataframe to identify the total number of trials per main condition (denominator of probabiliy)
+# make a grouped dataframe to identify the total number of trials per main condition (denominator of probability)
 total_possible_nm_df = nonmember_tidy %>% 
   group_by(CategoryType) %>% 
   summarise(n = n())
@@ -76,7 +76,6 @@ data_for_priors %>%
   select(Prior_range, CategoryType, predicted_answer) %>% 
   pivot_wider(names_from = predicted_answer, values_from = Prior_range)
 
-  
 
 data_for_priors %>% 
   filter(CategoryType == "Value" | CategoryType == "Artifact" | CategoryType == "Natural") %>% 

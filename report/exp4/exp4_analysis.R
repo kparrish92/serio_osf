@@ -3,7 +3,9 @@ library(tidyverse)
 library(brms)
 exp4 = read.csv(here("data", "exp4_data.csv"))
 exp4 <- tibble::rownames_to_column(exp4, "Participant")
+source(here::here("report", "exp2", "00_pairwise_comp_function.R"))
 
+# tidy
 PivotData <- pivot_longer(exp4, Water:Shovel, names_to="Item", values_to="Selection")
 FinalData <- PivotData %>% mutate(CategoryType = case_when(
   Item == "Water" ~ "Natural",
@@ -35,21 +37,16 @@ FinalData <- PivotData %>% mutate(CategoryType = case_when(
 FinalData$CategoryType = as.factor(FinalData$CategoryType)
 FinalData$CategoryType = relevel(FinalData$CategoryType, ref = "Value")
 
+# save output
 FinalData %>% 
   write.csv(here("data", "tidy", "exp4_tidy.csv"))
 
-unique(FinalData$CategoryType)
-
+# Generate priors 
+## Load exp 2 model
 exp2mod_for_priors = readRDS(here("data", "models", "exp2_model.rds"))
 
 
-#b2 <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item), 
-#          prior = prior_check,
-#          data=FinalData,
-#          family="categorical",
-#          file = here("data", "models", "exp4_model.rds"))
-
-
+## set priors 
 prior_check = c(set_prior("normal(-1, 0.5)", class = "Intercept", dpar = "muIs"),
                 set_prior("normal(.5, 0.5)", class = "Intercept", dpar = "muIsnot"),
                 set_prior("normal(-1.77, 0.5)", class = "b", dpar = "muIs", coef = "CategoryTypeArtifact"),
@@ -58,19 +55,17 @@ prior_check = c(set_prior("normal(-1, 0.5)", class = "Intercept", dpar = "muIs")
                 set_prior("normal(-6.98, 0.5)", class = "b", dpar = "muIsnot", coef = "CategoryTypeNatural"))
 
 
+## fit model with priors
+b4 <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item), 
+          data= FinalData %>% filter(CategoryType == "Natural" | CategoryType == "Value" | CategoryType == "Artifact"),
+          family="categorical",
+          prior = prior_check,
+          file = here("data", "models", "exp4_model.rds"))
+## fit model with default priors
 b4_s <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item), 
             data= FinalData %>% filter(CategoryType == "Natural" | CategoryType == "Value" | CategoryType == "Artifact"),
             family="categorical",
             file = here("data", "models", "exp4_model_s.rds"))
-
-b4 <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item), 
-            data= FinalData %>% filter(CategoryType == "Natural" | CategoryType == "Value" | CategoryType == "Artifact"),
-            family="categorical",
-            prior = prior_check,
-            file = here("data", "models", "exp4_model.rds"))
-
-
-conditional_effects(b4_s, categorical = TRUE)
 
 ### Pairwise comparisons 
 answer1 = c("Is", "Is not", "Both")
@@ -79,7 +74,7 @@ category1 = c("Value", "Artifact", "Natural")
 df_source = crossing(answer1,category1) %>% 
   mutate(cat_c = paste0(answer1,"_",category1))
 
-
+# generate list of possible comparisons 
 comp_list = list()  
 
 for (i in 1:9) {
@@ -89,24 +84,25 @@ for (i in 1:9) {
   comp_list[[i]] = this_df
 }
 
-
+# save all combos 
 combos = do.call(rbind, comp_list) 
 
+# set region of practical equivalence 
 rope_for_data = .2
 
+# save a filtered output of the data for the report
 FinalData %>% 
   filter(CategoryType == "Natural" | 
            CategoryType == "Value" | CategoryType == "Artifact") %>% 
   write.csv(here("data", "tidy", "exp4_filtered.csv"))
 
-
+# reload it under a new name (easier for the new loop)
 senses_tidy = read.csv(here("data", "tidy", "exp4_filtered.csv"))
 
-
-unique(senses_tidy$CategoryType)
-
+# rename model for the loop
 exp2_mod = b4
 
+# generate a big pairwise dataframe 
 list_pdf = list()
 for (it in 1:nrow(combos)) {
   pdf = create_pairwise_df(combos$answer1[it], combos$category1[it],
@@ -116,11 +112,15 @@ for (it in 1:nrow(combos)) {
   list_pdf[[it]] = pdf
 }
 
+# combine it 
 all_data = do.call(rbind,list_pdf)
 
+# set rope again
 rope = rope_for_data
 
-## Both across categories 
+# make plots and save them 
+
+### Both across categories 
 all_data %>% 
   mutate(comps = paste0(combo1,"_", combo2)) %>% 
   filter(comps == "Both_Artifact_Both_Natural" | comps == "Both_Artifact_Both_Value" |
@@ -272,10 +272,3 @@ create_pairwise_table("Is_Value_Both_Value", "Is_Value_Is not_Value",
   write.csv(here("data", "tidy", "exp4_posthoc_table_value.csv"))
 
 ggsave("within_value.png", path = here("report", "exp4", "figs"))
-
-length(unique(FinalData$Participant))
-unique(FinalData$CategoryType)
-
-FinalData %>% 
-  group_by(Participant) %>% 
-  summarise(n = n())

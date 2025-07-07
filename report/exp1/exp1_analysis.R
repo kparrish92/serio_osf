@@ -1,9 +1,10 @@
+# Load libraries
 library(here)
 library(tidyverse)
 library(brms)
 library(bayestestR)
 
-
+# load tidy data 
 nonmember_tidy = read.csv(here("data", "tidy", "nonmember_tidy.csv")) %>% 
   mutate(membership = "nonmember")
 member_tidy = read.csv(here("data", "tidy", "member_tidy.csv")) %>% 
@@ -13,6 +14,7 @@ member_tidy = read.csv(here("data", "tidy", "member_tidy.csv")) %>%
 ## Set priors 
 
 #### member model 
+sd = .5
 prior_artifact_m = qlogis(.25) # the value in qlogis is the expected probabiliy of 1
 prior_def_m = prior_artifact_m - qlogis(.95) 
 prior_nk_m = prior_artifact_m - qlogis(.4)
@@ -23,7 +25,6 @@ member_priors = c(set_prior(paste0("normal(", prior_def_m, ", ",sd,")"), coef = 
                   set_prior(paste0("normal(", prior_nk_m, ", ",sd,")"), coef = "CategoryTypeNatural"),
                   set_prior(paste0("normal(", prior_vague_m, ", ",sd,")"), coef = "CategoryTypeVague"),
                   set_prior(paste0("normal(", prior_value_m, ", ",sd,")"), coef = "CategoryTypeValue"))
-
 
 
 #### non-member model 
@@ -40,9 +41,7 @@ nonmember_priors = c(set_prior(paste0("normal(", prior_def_nm, ", ",sd,")"), coe
                      set_prior(paste0("normal(", prior_value_nm, ", ",sd,")"), coef = "CategoryTypeValue"))
 
 
-
-
-## Tidy data 
+## Combine the two dataframes 
 ord_data = rbind(member_tidy, nonmember_tidy) 
 ## Run member model
 ord_mod_member_priors <- brm(as.integer(Rating) ~ CategoryType + 
@@ -76,37 +75,3 @@ ord_mod_nonmember <- brm(as.integer(Rating) ~ CategoryType +
                                 family = cumulative(),
                                 cores = 4,
                                 file = here("data", "models","ord_nonmember_s.rds"))
-
-
-### The code below is checking of breakpoints etc. Should be cleaned up for sharing. 
-
-# Baseline - Artifact 
-plogis(fixef(ord_mod_member)[1])
-plogis(fixef(ord_mod_member)[2]) - plogis(fixef(ord_mod_member)[1])
-plogis(fixef(ord_mod_member)[3]) - plogis(fixef(ord_mod_member)[2])  
-plogis(fixef(ord_mod_member)[4]) - plogis(fixef(ord_mod_member)[3])  
-plogis(fixef(ord_mod_member)[5]) - plogis(fixef(ord_mod_member)[4])  
-plogis(fixef(ord_mod_member)[6]) - plogis(fixef(ord_mod_member)[5])  
-1- plogis(fixef(ord_mod_member)[6])  
-
-#  Definite 
-### Yeah this is complex - basically you need to calculate the cut points and then do subtraction.
-### The first two terms are the adjustment to the "intercept" cut point. Then you subtract the prevous cut point to get the predicted probability 
-plogis(fixef(ord_mod_member)[1] - fixef(ord_mod_member)[7]) # 1  
-plogis(fixef(ord_mod_member)[2] - fixef(ord_mod_member)[7]) - plogis(fixef(ord_mod_member)[1] - fixef(ord_mod_member)[7]) 
-plogis(fixef(ord_mod_member)[3] - fixef(ord_mod_member)[7]) - plogis(fixef(ord_mod_member)[2] - fixef(ord_mod_member)[7])
-plogis(fixef(ord_mod_member)[4] - fixef(ord_mod_member)[7]) - plogis(fixef(ord_mod_member)[3] - fixef(ord_mod_member)[7])
-plogis(fixef(ord_mod_member)[5] - fixef(ord_mod_member)[7]) - plogis(fixef(ord_mod_member)[4] - fixef(ord_mod_member)[7])
-plogis(fixef(ord_mod_member)[6] - fixef(ord_mod_member)[7]) - plogis(fixef(ord_mod_member)[5] - fixef(ord_mod_member)[7]) 
-1 - plogis(fixef(ord_mod_member)[6] - fixef(ord_mod_member)[7])
-
-### For the natural kinds predictor, change 7 to 8 
-plogis(fixef(ord_mod_member)[1] - fixef(ord_mod_member)[8]) # 1  
-plogis(fixef(ord_mod_member)[2] - fixef(ord_mod_member)[8]) - plogis(fixef(ord_mod_member)[1] - fixef(ord_mod_member)[8]) 
-plogis(fixef(ord_mod_member)[3] - fixef(ord_mod_member)[8]) - plogis(fixef(ord_mod_member)[2] - fixef(ord_mod_member)[8])
-plogis(fixef(ord_mod_member)[4] - fixef(ord_mod_member)[8]) - plogis(fixef(ord_mod_member)[3] - fixef(ord_mod_member)[8])
-plogis(fixef(ord_mod_member)[5] - fixef(ord_mod_member)[8]) - plogis(fixef(ord_mod_member)[4] - fixef(ord_mod_member)[8])
-plogis(fixef(ord_mod_member)[6] - fixef(ord_mod_member)[8]) - plogis(fixef(ord_mod_member)[5] - fixef(ord_mod_member)[8]) 
-1 - plogis(fixef(ord_mod_member)[6] - fixef(ord_mod_member)[8])
-
-

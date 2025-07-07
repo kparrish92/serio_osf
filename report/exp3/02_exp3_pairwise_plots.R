@@ -1,8 +1,6 @@
 
 exp3_pw = read.csv(here("data", "tidy", "exp3_pairwise_data.csv"))
-
-
-
+source(here::here("report", "exp2", "00_pairwise_comp_function.R"))
 rope = .2
 
 ## Elaine right (w/o neither)

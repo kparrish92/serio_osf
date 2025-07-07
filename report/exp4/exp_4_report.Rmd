@@ -1,7 +1,7 @@
 ---
-title: "Experiment 2"
+title: "Experiment 4"
 output: html_document
-date: "2024-11-3"
+date: "2025-07-07"
 ---
 
 ```{r setup, include=FALSE}
@@ -11,72 +11,34 @@ library(tidyverse)
 library(bayestestR)
 library(brms)
 # load plotting function
-source(here::here("report", "exp2", "pairwise_comp_function.R"))
+source(here::here("report", "exp2", "00_pairwise_comp_function.R"))
 # load model
-exp2_mod = read_rds(here("data", "models", "exp2_model.rds"))
-exp2_mod_s = read_rds(here("data", "models", "exp2_model_s.rds"))
-
+exp4_mod = read_rds(here("data", "models", "exp4_model.rds"))
+exp4_mod_s = read_rds(here("data", "models", "exp4_model_s.rds"))
 senses_tidy = read.csv(here("data", "tidy", "senses_tidy.csv")) 
 data_for_priors = read.csv(here("data", "tidy", "prior_data.csv"))
+exp4_tidy = read.csv(here("data", "tidy", "exp4_tidy.csv"))
+
 ```
 
-# Descriptive Statistics 
+
+# Descriptive statistics
 
 ```{r}
-senses_tidy %>% 
+exp4_tidy %>% 
   group_by(CategoryType, Selection) %>% 
-  summarise(n = n()/288) %>% 
+  summarise(n = n()) %>% 
   pivot_wider(names_from = Selection, values_from = n) %>% 
-  knitr::kable(digits = 2, caption = "Percentage of of the answer choices in each condition")
+  knitr::kable(digits = 2, caption = "Count of of the answer choices in each condition")
 ```
 
 ```{r, fig.cap= "The distribution of selections for each category type"}
-senses_tidy %>% 
+exp4_tidy %>% 
   group_by(CategoryType, Selection) %>% 
   summarise(n = n()) %>% 
   ggplot(aes(x = CategoryType, y = n, fill = Selection)) + geom_col(color = "black") + theme_minimal()
 ```
 
-
-
-
-### Our priors expressed as probabilities 
-
-Priors were calculated on the basis of the data from experiment 1.
-The ratings were used to predict answer of "is", "is not" or "both".
-In particular, the data was conditionally mutated depending upon whether it came from the nonmember_tidy or member_tidy data set. For the nonmember data, ratings of 1 or 2 were predicted to be “is” answers, 3, 4 and 5 were “both” answers, and 6 and 7 were “is not” answers. On the other hand, the member_tidy predicted answers were essentially the opposite: 1 and 2 were predicted to be “is not” answers, 3, 4, 5 and were “both” answers, and 6 and 7 were “is” answers. 
-The total proportion of predicted answers for each type was then divided by the total number of responses in a category to get the predicted probability.
-For example, if, within Natural Kinds and member data, there were 5 answers, 1, 2, 5, 6, 7, then the predicted probability of "Is not" would be .4, "Both" would be .2, and "Is" would be .4. 
-The ranges were chosen from setting a semi-conservative standard deviation in log-odds of .5.
-
-```{r}
-data_for_priors %>%
-  filter(CategoryType == "Value" | CategoryType == "Artifact" | CategoryType == "Natural") %>%
-  mutate(log_odds = qlogis(predicted_grp)) %>% 
-  mutate(upper = log_odds + .5) %>% 
-  mutate(lower = log_odds - .5) %>% 
-  mutate(upper_p = plogis(upper)) %>% 
-  mutate(lower_p = plogis(lower)) %>% 
-  mutate(predicted_grp_prob = round(predicted_grp, digits = 2)) %>% 
-  mutate(predicted_upper_p = round(upper_p, digits = 2)) %>% 
-  mutate(predicted_lower_p = round(lower_p, digits = 2)) %>% 
-  mutate(Prior_range = paste0(predicted_grp_prob, " [", predicted_lower_p, "-", predicted_upper_p, "]" )) %>% 
-  select(Prior_range, CategoryType, predicted_answer) %>% 
-  pivot_wider(names_from = predicted_answer, values_from = Prior_range) %>% 
-  knitr::kable(format = "pandoc")
-```
-
-
-```{r}
-data_for_priors %>%
-  filter(CategoryType == "Value" | CategoryType == "Artifact" | CategoryType == "Natural") %>% 
-  mutate(log_odds = qlogis(predicted_grp)) %>% 
-  mutate(upper = log_odds + .5) %>% 
-  mutate(lower = log_odds - .5) %>% 
-  mutate(upper_p = plogis(upper)) %>% 
-  mutate(lower_p = plogis(lower)) %>% 
-  ggplot(aes(x = CategoryType, y = predicted_grp, ymin = lower_p, ymax = upper_p, color = predicted_answer)) + geom_point(position = position_dodge(width = .3), size = 4) + geom_errorbar(position = position_dodge(width = .3)) + ylab("Prior Probability")
-```
 
 ### The results of the model
 
@@ -84,15 +46,14 @@ Model structure: `brm(Selection ~ CategoryType + (CategoryType | Participant) + 
 
 `Selection` had three levels: "Both","Is not", and "Is". The model predicted the log-odds of each choice as a function of `CategoryType`.
 
-`CategoryType` had three levels: "Natural", "Value" and "Artifact".
+`CategoryType` had three levels: "Natural", "Value", "Artifact", "Definite", "Vague".
 
-`Participant`: There were 48 participants, each with 18 data points total (6 per `CategoryType`). the model included a random slope of category type per participant. This both takes into account the nested structure of the data and allows for the estimation of individual probabilities per `CategoryType`. 
-
+`Participant`: There were 47 participants, each with 25 data points total (6 per `CategoryType`). the model included a random slope of category type per participant. This both takes into account the nested structure of the data and allows for the estimation of individual probabilities per `CategoryType`. 
 
 The table below reports the fixed effects and intercepts, as well as convergence metrics. This should be reported, but we won't use this to make inferences directly.
 
 ```{r}
-describe_posterior(exp2_mod) %>% 
+describe_posterior(exp4_mod) %>% 
   as_tibble() %>% 
   select(-c("CI", "ROPE_CI", "ROPE_low", "ROPE_high")) %>% 
   mutate(Parameter = case_when(
@@ -113,11 +74,11 @@ describe_posterior(exp2_mod) %>%
 This plot and table were generated from the model using the `conditional_effects` function in R. The function just does the addition needed and conversion to probability as a convenience. 
 
 ```{r}
-conditional_effects(exp2_mod, categorical = TRUE)
+conditional_effects(exp4_mod, categorical = TRUE)
 ```
 
 ```{r}
-conditional_effects(exp2_mod, categorical = TRUE)[["CategoryType:cats__"]] %>% 
+conditional_effects(exp4_mod, categorical = TRUE)[["CategoryType:cats__"]] %>% 
   select(effect1__, effect2__, estimate__, lower__, upper__) %>% 
   mutate(estimate__ = round(estimate__, digits = 2)) %>% 
   mutate(lower__ = round(lower__, digits = 2)) %>% 
@@ -129,18 +90,18 @@ conditional_effects(exp2_mod, categorical = TRUE)[["CategoryType:cats__"]] %>%
   knitr::kable(format = "pandoc", digits = 2)
 ```
 
-# The pairwise comparisons (updated in December)
+# The pairwise comparisons 
 
 The pairwise comparisons were done by extracting the fitted draws from the Bayesian model described above and making the relevant subtractions. First, we zoom in on the differences within each answer choice between conditions (comparing the red points on the top plot). In other words, this tells us, although "both" was the most probable response for Value, Artifact and Natural kind conditions, was there evidence of a meaningful difference in the three possible comparisons?  
 
 ## Both-both across categories 
 
 ```{r}
-knitr::include_graphics(here("report", "exp2", "figs", "both_cond_plots.png"))
+knitr::include_graphics(here("report", "exp4", "figs", "both_cond_plots.png"))
 ```
 
 ```{r}
-read.csv(here("data", "tidy", "exp2_posthoc_table_both.csv")) %>% 
+read.csv(here("data", "tidy", "exp4_posthoc_table_both.csv")) %>% 
   select(-X) %>% 
   knitr::kable(format = "pandoc")
 ```
@@ -148,11 +109,11 @@ read.csv(here("data", "tidy", "exp2_posthoc_table_both.csv")) %>%
 # Is-is across categories 
 
 ```{r}
-knitr::include_graphics(here("report", "exp2", "figs", "is_cond_plots.png"))
+knitr::include_graphics(here("report", "exp4", "figs", "is_cond_plots.png"))
 ```
 
 ```{r}
-read.csv(here("data", "tidy", "exp2_posthoc_table_is.csv")) %>% 
+read.csv(here("data", "tidy", "exp4_posthoc_table_is.csv")) %>% 
   select(-X) %>% 
   knitr::kable(format = "pandoc")
 ```
@@ -160,11 +121,11 @@ read.csv(here("data", "tidy", "exp2_posthoc_table_is.csv")) %>%
 # Is not - is not across categories 
 
 ```{r}
-knitr::include_graphics(here("report", "exp2", "figs", "isnot_cond_plots.png"))
+knitr::include_graphics(here("report", "exp4", "figs", "isnot_cond_plots.png"))
 ```
 
 ```{r}
-read.csv(here("data", "tidy", "exp2_posthoc_table_isnot.csv")) %>% 
+read.csv(here("data", "tidy", "exp4_posthoc_table_isnot.csv")) %>% 
   select(-X) %>% 
   knitr::kable(format = "pandoc")
 ```
@@ -172,11 +133,11 @@ read.csv(here("data", "tidy", "exp2_posthoc_table_isnot.csv")) %>%
 # Both, is, is not within natural kinds 
 
 ```{r}
-knitr::include_graphics(here("report", "exp2", "figs", "within_nk.png"))
+knitr::include_graphics(here("report", "exp4", "figs", "within_nk.png"))
 ```
 
 ```{r}
-read.csv(here("data", "tidy", "exp2_posthoc_table_natural.csv")) %>% 
+read.csv(here("data", "tidy", "exp4_posthoc_table_natural.csv")) %>% 
   select(-X) %>% 
   knitr::kable(format = "pandoc")
 ```
@@ -185,11 +146,11 @@ read.csv(here("data", "tidy", "exp2_posthoc_table_natural.csv")) %>%
 # Both, is, is not within artifacts 
 
 ```{r}
-knitr::include_graphics(here("report", "exp2", "figs", "within_art.png"))
+knitr::include_graphics(here("report", "exp4", "figs", "within_art.png"))
 ```
 
 ```{r}
-read.csv(here("data", "tidy", "exp2_posthoc_table_artifact.csv")) %>% 
+read.csv(here("data", "tidy", "exp4_posthoc_table_artifact.csv")) %>% 
   select(-X) %>% 
   knitr::kable(format = "pandoc")
 ```
@@ -197,20 +158,19 @@ read.csv(here("data", "tidy", "exp2_posthoc_table_artifact.csv")) %>%
 # Both, is, is not within value
 
 ```{r}
-knitr::include_graphics(here("report", "exp2", "figs", "within_value.png"))
+knitr::include_graphics(here("report", "exp4", "figs", "within_value.png"))
 ```
 
 ```{r}
-read.csv(here("data", "tidy", "exp2_posthoc_table_value.csv")) %>% 
+read.csv(here("data", "tidy", "exp4_posthoc_table_value.csv")) %>% 
   select(-X) %>% 
   knitr::kable(format = "pandoc")
 ```
 
 # Sensitivity analysis 
 
-**Model summary with default priors**
 ```{r}
-describe_posterior(exp2_mod_s) %>% 
+describe_posterior(exp4_mod_s) %>% 
   as_tibble() %>% 
   select(-c("CI", "ROPE_CI", "ROPE_low", "ROPE_high")) %>% 
   mutate(Parameter = case_when(
@@ -225,14 +185,12 @@ describe_posterior(exp2_mod_s) %>%
   knitr::kable(format = "pandoc", digits = 2)
 ```
 
-**Conditional Effects plot with default priors**
 ```{r}
-conditional_effects(exp2_mod_s, categorical = TRUE)
+conditional_effects(exp4_mod_s, categorical = TRUE)
 ```
 
-**Conditional Effects table with default priors**
 ```{r}
-conditional_effects(exp2_mod_s, categorical = TRUE)[["CategoryType:cats__"]] %>% 
+conditional_effects(exp4_mod_s, categorical = TRUE)[["CategoryType:cats__"]] %>% 
   select(effect1__, effect2__, estimate__, lower__, upper__) %>% 
   mutate(estimate__ = round(estimate__, digits = 2)) %>% 
   mutate(lower__ = round(lower__, digits = 2)) %>% 

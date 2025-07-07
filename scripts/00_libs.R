@@ -1,8 +1,0 @@
-library(here)
-library(tidyverse)
-library(janitor)
-library(bayestestR)
-library(bayesplot)
-library(tidybayes)
-library(modelr)
-library(brms)
