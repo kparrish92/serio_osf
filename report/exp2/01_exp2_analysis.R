@@ -117,5 +117,3 @@ b2_s <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item)
           data= senses_tidy,
           family="categorical",
           file = here("data", "models", "exp2_model_s.rds"))
-
-

@@ -43,7 +43,7 @@ for (it in 1:nrow(combos)) {
 all_data = do.call(rbind,list_pdf)
 
 
-all_data %>% group_by(combo1, combo2) %>% 
+d = all_data %>% group_by(combo1, combo2) %>% 
   summarize(Effect = mean(effect), 
             Pct_rope = sum(in_rope)/4000) 
 
