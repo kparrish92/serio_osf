@@ -200,3 +200,30 @@ conditional_effects(exp1_mod_nm_s, categorical = TRUE)[["CategoryType:cats__"]] 
   pivot_wider(names_from = Rating, values_from = model_effect) %>%  knitr::kable(format = "pandoc", digits = 2)
 ```
 
+## Added analysis 7-30-25
+
+**Posterior Predictive Checks for all models**
+
+Please see the four posterior predictive checks for all models below. In each case, they seem fine to me. Visually, I don't see any indication that the models systematically differ from the observed data. 
+
+**Member model default priors PPC**
+```{r}
+pp_check(exp1_mod_m_s)
+```
+
+**Non-Member model default priors PPC**
+```{r}
+pp_check(exp1_mod_nm_s)
+```
+
+**Member model informed priors PPC**
+```{r}
+pp_check(exp1_mod_m)
+```
+
+**Non-Member model informed priors PPC**
+```{r}
+pp_check(exp1_mod_nm)
+```
+
+

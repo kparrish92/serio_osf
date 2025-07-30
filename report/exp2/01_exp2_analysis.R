@@ -112,20 +112,13 @@ b2 <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item),
           data=senses_tidy,
           family="categorical",
           save_all_pars = TRUE,
-          file = here("data", "models", "exp2_model_save.rds"))
-
-
-pp_check(b2)
-plot(b2, priors = TRUE)
+          file = here("data", "models", "exp2_model.rds"))
 
 b2_s <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item), 
           data= senses_tidy,
           family="categorical",
           save_all_pars = TRUE,
-          file = here("data", "models", "exp2_model_s_save.rds"))
+          file = here("data", "models", "exp2_model_s.rds"))
 
 bayes_factor(b2, b2_s)
 
-pp_check(b2_s)
-
-plot(b2_s, priors = TRUE)

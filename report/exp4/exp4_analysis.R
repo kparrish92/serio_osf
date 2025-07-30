@@ -60,11 +60,13 @@ b4 <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item),
           data= FinalData %>% filter(CategoryType == "Natural" | CategoryType == "Value" | CategoryType == "Artifact"),
           family="categorical",
           prior = prior_check,
+          save_all_pars = TRUE,
           file = here("data", "models", "exp4_model.rds"))
 ## fit model with default priors
 b4_s <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | Item), 
             data= FinalData %>% filter(CategoryType == "Natural" | CategoryType == "Value" | CategoryType == "Artifact"),
             family="categorical",
+            save_all_pars = TRUE,
             file = here("data", "models", "exp4_model_s.rds"))
 
 ### Pairwise comparisons 

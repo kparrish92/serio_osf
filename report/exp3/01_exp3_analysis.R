@@ -89,12 +89,14 @@ b3 <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | spec),
             data=exp3_tidy,
             prior = prior_check,
             family="categorical",
+            save_all_pars = TRUE,
             file = here("data", "models", "exp3_model.rds"))
 
 # run model with default priors
 b3_s <- brm(Selection ~ CategoryType + (CategoryType | Participant) + (1 | spec), 
           data=exp3_tidy,
           family="categorical",
+          save_all_pars = TRUE,
           file = here("data", "models", "exp3_model_s.rds"))
 
 
@@ -138,7 +140,6 @@ all_data = do.call(rbind,list_pdf)
 # save output
 all_data %>% 
   write.csv(here("data", "tidy", "exp3_pairwise_data.csv"))
-
 
 
 

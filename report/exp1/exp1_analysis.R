@@ -49,6 +49,7 @@ ord_mod_member_priors <- brm(as.integer(Rating) ~ CategoryType +
                data = ord_data %>% filter(membership == "member"),
                family = cumulative(),
                prior = member_priors,
+               save_all_pars = TRUE,
                cores = 4,
                file = here("data", "models","ord_member.rds"))
 
@@ -56,6 +57,7 @@ ord_mod_member <- brm(as.integer(Rating) ~ CategoryType +
                  (CategoryType | Participant) + (1 | Item),
                data = ord_data %>% filter(membership == "member"),
                family = cumulative(),
+               save_all_pars = TRUE,
                cores = 4,
                file = here("data", "models","ord_member_s.rds"))
 
@@ -66,6 +68,7 @@ ord_mod_nonmember_priors <- brm(as.integer(Rating) ~ CategoryType +
                       data = ord_data %>% filter(membership == "nonmember"),
                       family = cumulative(),
                       prior = nonmember_priors,
+                      save_all_pars = TRUE,
                       cores = 4,
                       file = here("data", "models","ord_nonmember.rds"))
 
@@ -74,4 +77,7 @@ ord_mod_nonmember <- brm(as.integer(Rating) ~ CategoryType +
                                 data = ord_data %>% filter(membership == "nonmember"),
                                 family = cumulative(),
                                 cores = 4,
+                                save_all_pars = TRUE,
                                 file = here("data", "models","ord_nonmember_s.rds"))
+
+

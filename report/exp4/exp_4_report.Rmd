@@ -201,3 +201,18 @@ conditional_effects(exp4_mod_s, categorical = TRUE)[["CategoryType:cats__"]] %>%
   pivot_wider(names_from = effect2__, values_from = model_effect) %>% 
   knitr::kable(format = "pandoc", digits = 2)
 ```
+
+## Added analysis 7-30-25
+
+**Posterior Predictive Checks for all models**
+
+**Model with default priors PPC**
+```{r}
+pp_check(exp4_mod_s)
+```
+
+**Model with informed priors PPC**
+```{r}
+pp_check(exp4_mod)
+```
+
