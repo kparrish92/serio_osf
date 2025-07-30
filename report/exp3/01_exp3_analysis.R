@@ -3,7 +3,7 @@ library(tidyverse)
 library(brms)
 library(bayestestR)
 
-# Load helper functions (including pairwise comp fuction)
+# Load helper functions (including pairwise comp function)
 source(here::here("report", "exp2", "00_pairwise_comp_function.R"))
 
 # Tidy the data 
@@ -127,7 +127,7 @@ rope_for_data = .2
 # use combos dataframe to generate bigger post-hoc comparisons dataframe 
 list_pdf = list()
 for (it in 1:nrow(combos)) {
-  pdf = create_pairwise_df_exp3(combos$answer1[it], combos$category1[it],
+  pdf = create_pairwise_df_exp3(b3, combos$answer1[it], combos$category1[it],
                            combos$answer2[it], combos$category2[it], rope = rope_for_data) %>% 
     mutate(combo1 = paste0(combos$answer1[it], "_", combos$category1[it])) %>% 
     mutate(combo2 = paste0(combos$answer2[it], "_", combos$category2[it]))
@@ -137,10 +137,24 @@ for (it in 1:nrow(combos)) {
 # combine 
 all_data = do.call(rbind,list_pdf)
 
+list_pdf_s = list()
+for (it in 1:nrow(combos)) {
+  pdf = create_pairwise_df_exp3(b3_s, combos$answer1[it], combos$category1[it],
+                                combos$answer2[it], combos$category2[it], rope = rope_for_data) %>% 
+    mutate(combo1 = paste0(combos$answer1[it], "_", combos$category1[it])) %>% 
+    mutate(combo2 = paste0(combos$answer2[it], "_", combos$category2[it]))
+  list_pdf_s[[it]] = pdf
+}
+
+# combine 
+all_data_s = do.call(rbind,list_pdf_s)
+
 # save output
 all_data %>% 
   write.csv(here("data", "tidy", "exp3_pairwise_data.csv"))
 
+all_data_s %>% 
+  write.csv(here("data", "tidy", "exp3_pairwise_data_s.csv"))
 
 
 

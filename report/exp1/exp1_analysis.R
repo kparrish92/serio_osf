@@ -81,3 +81,10 @@ ord_mod_nonmember <- brm(as.integer(Rating) ~ CategoryType +
                                 file = here("data", "models","ord_nonmember_s.rds"))
 
 
+
+bayes_factor(ord_mod_nonmember, ord_mod_nonmember_priors)
+
+bayes_factor(ord_mod_member, ord_mod_member_priors)
+
+  
+

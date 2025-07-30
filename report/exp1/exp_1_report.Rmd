@@ -8,7 +8,9 @@ date: "2025-07-07"
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(here)
 library(tidyverse)
+library(modelr)
 library(bayestestR)
+library(tidybayes)
 library(brms)
 exp1_mod_nm = read_rds(here("data", "models", "ord_nonmember.rds"))
 exp1_mod_m = read_rds(here("data", "models", "ord_member.rds"))
@@ -226,4 +228,63 @@ pp_check(exp1_mod_m)
 pp_check(exp1_mod_nm)
 ```
 
+**Comparing model predictions for default and informed prior models**
+
+These plots compared the fitted draws from models using either informed or default priors.    
+
+**Non member models**
+```{r}
+
+nonmember_tidy = read.csv(here("data", "tidy", "nonmember_tidy.csv")) %>% 
+  mutate(membership = "nonmember")
+member_tidy = read.csv(here("data", "tidy", "member_tidy.csv")) %>% 
+  mutate(membership = "member")
+ord_data = rbind(member_tidy, nonmember_tidy) 
+
+
+#### Plots for sensitvity analysis 
+
+nm_ord_data = ord_data %>% filter(membership == "nonmember")
+m_ord_data = ord_data %>% filter(membership == "member")
+
+pred_def_nm  = nm_ord_data %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(exp1_mod_nm_s, dpar = TRUE, category = "Rating",
+                   re_formula = NA) %>% 
+  mutate(priors = "Default")
+
+pred_priors_nm  = nm_ord_data %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(exp1_mod_nm, dpar = TRUE, category = "Rating",
+                      re_formula = NA) %>% 
+  mutate(priors = "Informed")
+
+
+pred_def_m  = m_ord_data %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(exp1_mod_m_s, dpar = TRUE, category = "Rating",
+                      re_formula = NA) %>% 
+  mutate(priors = "Default")
+
+pred_priors_m  = m_ord_data %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(exp1_mod_m, dpar = TRUE, category = "Rating",
+                      re_formula = NA) %>% 
+  mutate(priors = "Informed")
+
+rbind(pred_def_nm, pred_priors_nm) %>% 
+  group_by(.prediction, priors, CategoryType) %>% 
+  summarize(n = n()) %>% 
+  ggplot(aes(x = .prediction, y = n, fill = priors)) + geom_col(position = "dodge") +
+  facet_wrap(~CategoryType) + theme_minimal()
+```
+
+**Member models**
+```{r}
+rbind(pred_def_m, pred_priors_m) %>% 
+  group_by(.prediction, priors, CategoryType) %>% 
+  summarize(n = n()) %>% 
+  ggplot(aes(x = .prediction, y = n, fill = priors)) + geom_col(position = "dodge") +
+  facet_wrap(~CategoryType) + theme_minimal()
+```
 

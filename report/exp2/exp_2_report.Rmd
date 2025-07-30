@@ -257,3 +257,103 @@ pp_check(exp2_mod_s)
 ```{r}
 pp_check(exp2_mod)
 ```
+
+**Comparing model predictions for default and informed prior models**
+
+```{r}
+senses_tidy = read.csv(here("data", "tidy", "senses_tidy.csv")) 
+
+pred_def_nm_2  = senses_tidy %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(exp2_mod_s, dpar = TRUE, category = "Selection",
+                   re_formula = NA) %>% 
+  mutate(priors = "Default")
+
+pred_priors_nm_2  = senses_tidy %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(exp2_mod, dpar = TRUE, category = "Selection",
+                      re_formula = NA) %>% 
+  mutate(priors = "Informed")
+
+rbind(pred_def_nm_2, pred_priors_nm_2) %>% 
+  group_by(.prediction, priors, CategoryType) %>% 
+  summarize(n = n()) %>% 
+  ggplot(aes(x = .prediction, y = n, fill = priors)) + geom_col(position = "dodge") +
+  facet_wrap(~CategoryType) + theme_minimal()
+```
+
+**Posthoc analysis using the default priors**
+
+## Both-both across categories **default priors**
+
+```{r}
+knitr::include_graphics(here("report", "exp2", "figs", "both_cond_plots_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp2_posthoc_table_both_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+# Is-is across categories **default priors**
+
+```{r}
+knitr::include_graphics(here("report", "exp2", "figs", "is_cond_plots_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp2_posthoc_table_is_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+# Is not - is not across categories **default priors**
+
+```{r}
+knitr::include_graphics(here("report", "exp2", "figs", "isnot_cond_plots_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp2_posthoc_table_isnot_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+# Both, is, is not within natural kinds **default priors**
+
+```{r}
+knitr::include_graphics(here("report", "exp2", "figs", "within_nk_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp2_posthoc_table_natural_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+
+# Both, is, is not within artifacts **default priors**
+
+```{r}
+knitr::include_graphics(here("report", "exp2", "figs", "within_art_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp2_posthoc_table_artifact_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+# Both, is, is not within value **default priors**
+
+```{r}
+knitr::include_graphics(here("report", "exp2", "figs", "within_value_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp2_posthoc_table_value_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+

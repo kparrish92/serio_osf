@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(here)
 library(tidyverse)
 library(bayestestR)
+library(tidybayes)
+library(modelr)
 library(brms)
 
 exp3_tidy = read.csv(here("data", "tidy", "four_choice_data.csv")) %>% 
@@ -212,3 +214,102 @@ pp_check(four_choice_mod_s)
 ```{r}
 pp_check(four_choice_mod)
 ```
+
+**Comparing model predictions for default and informed prior models**
+
+```{r}
+pred_def_nm_3  = exp3_tidy %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(four_choice_mod_s, dpar = TRUE, category = "Selection",
+                   re_formula = NA) %>% 
+  mutate(priors = "Default")
+
+pred_priors_nm_3  = exp3_tidy %>% 
+  data_grid(CategoryType) %>% 
+  add_predicted_draws(four_choice_mod, dpar = TRUE, category = "Selection",
+                      re_formula = NA) %>% 
+  mutate(priors = "Informed")
+
+rbind(pred_def_nm_3, pred_priors_nm_3) %>% 
+  group_by(.prediction, priors, CategoryType) %>% 
+  summarize(n = n()) %>% 
+  ggplot(aes(x = .prediction, y = n, fill = priors)) + geom_col(position = "dodge") +
+  facet_wrap(~CategoryType) + theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+# Pairwise comparisons 
+
+## Elaine is right between answer choices **default**
+
+```{r}
+knitr::include_graphics(here("report", "exp3", "figs", "elaine_pairw_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp3_posthoc_table_elaine_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+## Akira is right between answer choices **default**
+
+```{r}
+knitr::include_graphics(here("report", "exp3", "figs", "akira_pairw_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp3_posthoc_table_akira_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+## Both are right is right between answer choices **default**
+
+```{r}
+knitr::include_graphics(here("report", "exp3", "figs", "both_pairw_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp3_posthoc_table_both_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+## Within Natural Kinds **default**
+
+*For these, I left out the pairwise comps with neither, given it was always near 0*
+
+```{r}
+knitr::include_graphics(here("report", "exp3", "figs", "nk_pairw_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp3_posthoc_table_nk_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+## Within value **default**
+
+```{r}
+knitr::include_graphics(here("report", "exp3", "figs", "value_pairw_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp3_posthoc_table_value_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+
+## Within artifact **default**
+
+```{r}
+knitr::include_graphics(here("report", "exp3", "figs", "art_pairw_default.png"))
+```
+
+```{r}
+read.csv(here("data", "tidy", "exp3_posthoc_table_art_default.csv")) %>% 
+  select(-X) %>% 
+  knitr::kable(format = "pandoc")
+```
+

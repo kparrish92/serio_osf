@@ -91,14 +91,37 @@ create_pairwise_table = function(comb1, comb2, comb3)
   return(table)
 }
 
+create_pairwise_table_d = function(comb1, comb2, comb3)
+  
+{
+  table = all_data_s %>% 
+    mutate(Comparison = paste0(combo1,"_", combo2)) %>% 
+    filter(Comparison == comb1 | Comparison == comb2 |
+             Comparison == comb3) %>% 
+    group_by(Comparison) %>% 
+    summarize(HDI = hdi(effect), mean_eff = mean(effect), 
+              Percentage_in_rope = sum(in_rope)/4000) %>% 
+    mutate(Compelling_difference = ifelse(Percentage_in_rope < .05, "Yes", "No")) %>% 
+    mutate(Effect = paste0(round(mean_eff, digits = 2), 
+                           " [",
+                           round(HDI[,1], digits = 2),
+                           " - ",
+                           round(HDI[,2], digits = 2),
+                           "]")) %>% 
+    select(Comparison, Effect, Compelling_difference) %>% 
+    arrange(desc(Comparison))
+  return(table)
+}
 
 
-create_pairwise_df_exp3 = function(answer1, category1, answer2, category2, rope)
+
+
+create_pairwise_df_exp3 = function(model, answer1, category1, answer2, category2, rope)
 {
   
   big_df_3 = exp3_tidy %>% 
     data_grid(CategoryType) %>%
-    add_fitted_draws(b3, dpar = TRUE, category = "Selection",
+    add_fitted_draws(model, dpar = TRUE, category = "Selection",
                      re_formula = NA) %>% 
     mutate(log_odds = qlogis(.value))
   
